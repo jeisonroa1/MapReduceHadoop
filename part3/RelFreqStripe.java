@@ -19,22 +19,22 @@ public class RelFreqStripe {
 	    private final static IntWritable one = new IntWritable(1);
 	     
 	    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-	        String line = value.toString();
-		    String[] events = line.split("\\s+");
-		    for(int i=0; i<events.length-1; ++i){
-		    	String u = events[i];
-   			MapWritable tempMap = new MapWritable();
-		    	String[] window = Arrays.copyOfRange(events, i+1, events.length);
+	        String record = value.toString();
+		    String[] words = record.split("\\s+");
+		    for(int i=0; i<words.length-1; ++i){
+		    	String u = words[i];
+   			MapWritable tMap = new MapWritable();
+		    	String[] window = Arrays.copyOfRange(words, i+1, words.length);
 		    	for(String v : window){
 		    		if(v.equals(u)) break;
    				Text vWrit = new Text(v);
-   		    	if(!tempMap.containsKey(vWrit)) tempMap.put(vWrit, one);
+   		    	if(!tMap.containsKey(vWrit)) tMap.put(vWrit, one);
    				else{
-   				    int aux = ((IntWritable) tempMap.get(vWrit)).get() + 1;
-   				    tempMap.put(vWrit, new IntWritable(aux));
+   				    int aux = ((IntWritable) tMap.get(vWrit)).get() + 1;
+   				    tMap.put(vWrit, new IntWritable(aux));
    				}
 		    	}
-   			context.write(new Text(u), tempMap);
+   			context.write(new Text(u), tMap);
 		    }
 	    }
 	 }
@@ -45,10 +45,10 @@ public class RelFreqStripe {
 	      throws IOException, InterruptedException {
 	        MapWritable finalMap = new MapWritable();
 			for (MapWritable map : values) {
-			    //element-wise addition
-				Iterator<MapWritable.Entry<Writable, Writable>> temp = map.entrySet().iterator();
-				while(temp.hasNext()){
-					MapWritable.Entry<Writable, Writable> entry = temp.next();
+			    // Element-wise addition
+				Iterator<MapWritable.Entry<Writable, Writable>> temporal = map.entrySet().iterator();
+				while(temporal.hasNext()){
+					MapWritable.Entry<Writable, Writable> entry = temporal.next();
 					if(!finalMap.containsKey(entry.getKey())) finalMap.put(entry.getKey(), entry.getValue());
 					else{
 						int aux = ((IntWritable) finalMap.get(entry.getKey())).get();
@@ -57,18 +57,18 @@ public class RelFreqStripe {
 					}
 				}
 			}
-			//sum of all elements in finalMap
+			//Sum every element in finalMap
 			int s = 0; 
-			Iterator<MapWritable.Entry<Writable, Writable>> temp = finalMap.entrySet().iterator();
-			while(temp.hasNext()){
-				MapWritable.Entry<Writable, Writable> entry = temp.next();
+			Iterator<MapWritable.Entry<Writable, Writable>> temporal = finalMap.entrySet().iterator();
+			while(temporal.hasNext()){
+				MapWritable.Entry<Writable, Writable> entry = temporal.next();
 				s += ((IntWritable) entry.getValue()).get();
 			}
-			//emit relative frequency
+			//Emit relative frequency
 			PrintMapWritable doubleMap = new PrintMapWritable();
-			temp = finalMap.entrySet().iterator();
-			while(temp.hasNext()){
-				MapWritable.Entry<Writable, Writable> entry = temp.next();
+			temporal = finalMap.entrySet().iterator();
+			while(temporal.hasNext()){
+				MapWritable.Entry<Writable, Writable> entry = temporal.next();
 				String relFreq = ((IntWritable) entry.getValue()).get()+"/"+s;
 				doubleMap.put((WritableComparable) entry.getKey(), new Text(relFreq));
 			}
@@ -87,23 +87,17 @@ public class RelFreqStripe {
 	     
     public static void main(String[] args) throws Exception {
        Configuration conf = new Configuration();
-        
-       Job job = new Job(conf, "relativeFreq");
+       Job job = new Job(conf, "relativeFrequency");
        job.setJarByClass(RelFreqStripe.class);
-        
        job.setOutputKeyClass(Text.class);
        job.setOutputValueClass(PrintMapWritable.class);
        job.setMapOutputValueClass(MapWritable.class);
-       
        job.setMapperClass(Map.class);
        job.setReducerClass(Reduce.class);
-        
        job.setInputFormatClass(TextInputFormat.class);
        job.setOutputFormatClass(TextOutputFormat.class);
-        
        FileInputFormat.addInputPath(job, new Path(args[0]));
        FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        
        job.waitForCompletion(true);
     }
 }

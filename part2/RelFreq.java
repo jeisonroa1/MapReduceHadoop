@@ -20,10 +20,10 @@ public class RelFreq {
 	     
 	    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 	        String line = value.toString();
-		    String[] events = line.split("\\s+");
-		    for(int i=0; i<events.length-1; ++i){
-		    	String u = events[i];
-		    	String[] window = Arrays.copyOfRange(events, i+1, events.length);
+		    String[] words = line.split("\\s+");
+		    for(int i=0; i<words.length-1; ++i){
+		    	String u = words[i];
+		    	String[] window = Arrays.copyOfRange(words, i+1, words.length);
 		    	for(String v : window){
 		    		if(v.equals(u)) break;
 		    		context.write(new Pair(new Text(u), new Text(v)), one);
@@ -84,7 +84,6 @@ public class RelFreq {
 			int comp = this.s1.compareTo(p.s1);
 			if(comp != 0) return comp;
 			return this.s2.compareTo(p.s2);
-			//return comp==0 ? this.s2.compareTo(p.s2) : comp;
 		}
 		@Override
 		public boolean equals(Object o){
@@ -103,24 +102,19 @@ public class RelFreq {
 	 }
 	     
 	 public static void main(String[] args) throws Exception {
+
 	    Configuration conf = new Configuration();
-	     
-	    Job job = new Job(conf, "relativeFreq");
+	    Job job = new Job(conf, "relativeFrequency");
 	    job.setJarByClass(RelFreq.class);
-	     
 	    job.setOutputKeyClass(Pair.class);
 	    job.setOutputValueClass(Text.class);
 	    job.setMapOutputValueClass(IntWritable.class);
-	     
 	    job.setMapperClass(Map.class);
 	    job.setReducerClass(Reduce.class);
-	     
 	    job.setInputFormatClass(TextInputFormat.class);
 	    job.setOutputFormatClass(TextOutputFormat.class);
-	     
 	    FileInputFormat.addInputPath(job, new Path(args[0]));
 	    FileOutputFormat.setOutputPath(job, new Path(args[1]));
-	     
 	    job.waitForCompletion(true);
 	 }
 
