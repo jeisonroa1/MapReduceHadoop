@@ -1,4 +1,4 @@
-package org.myorg;
+package BigDataProject1;
 
 import java.io.IOException;
 import java.util.*;
@@ -12,18 +12,19 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
      
-public class WordCount {
-     
- public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+
+public class WordCountTest {
+	
+	public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
     private final static IntWritable one = new IntWritable(1);
-    private Text word = new Text();
+    private Text words = new Text();
      
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         String line = value.toString();
     StringTokenizer tokenizer = new StringTokenizer(line);
     while (tokenizer.hasMoreTokens()) {
-        word.set(tokenizer.nextToken());
-        context.write(word, one);
+        words.set(tokenizer.nextToken());
+        context.write(words, one);
     }
     }
  }
@@ -33,32 +34,34 @@ public class WordCount {
     public void reduce(Text key, Iterable<IntWritable> values, Context context)
       throws IOException, InterruptedException {
         int sum = 0;
-    for (IntWritable val : values) {
-        sum += val.get();
+    for (IntWritable value : values) {
+        sum += value.get();
     }
     context.write(key, new IntWritable(sum));
     }
  }
      
  public static void main(String[] args) throws Exception {
-    Configuration conf = new Configuration();
+    Configuration configurations = new Configuration();
      
-    Job job = new Job(conf, "wordcount");
-    job.setJarByClass(WordCount.class);
+    Job teamjob = new Job(configurations, "wordcount");
+    teamjob.setJarByClass(WordCountTest.class);
      
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(IntWritable.class);
+    teamjob.setOutputKeyClass(Text.class);
+    teamjob.setOutputValueClass(IntWritable.class);
      
-    job.setMapperClass(Map.class);
-    job.setReducerClass(Reduce.class);
+    teamjob.setMapperClass(Map.class);
+    teamjob.setReducerClass(Reduce.class);
      
-    job.setInputFormatClass(TextInputFormat.class);
-    job.setOutputFormatClass(TextOutputFormat.class);
+    teamjob.setInputFormatClass(TextInputFormat.class);
+    teamjob.setOutputFormatClass(TextOutputFormat.class);
      
-    FileInputFormat.addInputPath(job, new Path(args[0]));
-    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    FileInputFormat.addInputPath(teamjob, new Path(args[0]));
+    FileOutputFormat.setOutputPath(teamjob, new Path(args[1]));
      
-    job.waitForCompletion(true);
+    teamjob.waitForCompletion(true);
  }
      
 }
+
+

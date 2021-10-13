@@ -1,4 +1,4 @@
-package org.myorg;
+package BigDataProject1;
 
 import java.io.IOException;
 import java.util.*;
@@ -12,72 +12,76 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-public class InMapperWordCount {
-    
-	public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
-	   private java.util.Map<String, Integer> combiningMap;
-	   private Text word = new Text();
-	   
-	   public void setup(Context context){
-		   combiningMap = new HashMap<>();
-	   }
-	   
-	   public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-	       String line = value.toString();
-		   StringTokenizer tokenizer = new StringTokenizer(line);
-		   while (tokenizer.hasMoreTokens()) {
-		       String token = tokenizer.nextToken();
-			   if(combiningMap.containsKey(token)){
-				   int sum = (int) combiningMap.get(token) + 1;
-				   combiningMap.put(token, sum);
-			   }
-			   else combiningMap.put(token, 1);
-		   }
-	   }
-	   
-	   public void cleanup(Context context) throws IOException, InterruptedException{
-		   Iterator<java.util.Map.Entry<String, Integer>> temp = combiningMap.entrySet().iterator();
-		   
-		   while(temp.hasNext()){
-			   java.util.Map.Entry<String, Integer> entry = temp.next();
-			   String keyVal = entry.getKey();
-			   Integer val = entry.getValue();
-			   context.write(new Text(keyVal), new IntWritable(val));
-		   }
-	   }
-	}
-	    
-	public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+public class MapComWordCount {
 	
-	   public void reduce(Text key, Iterable<IntWritable> values, Context context)
-	     throws IOException, InterruptedException {
-	       int sum = 0;
-		   for (IntWritable val : values) {
-		       sum += val.get();
+	
+public static class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+		   private java.util.Map<String, Integer> MapCom;
+		   private Text word = new Text();
+		   
+		   public void setup(Context context){
+			   MapCom = new HashMap<>();
 		   }
-		   context.write(key, new IntWritable(sum));
-	   }
+		   
+		   public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		       String line = value.toString();
+			   StringTokenizer tokenizer = new StringTokenizer(line);
+			   while (tokenizer.hasMoreTokens()) {
+			       String token = tokenizer.nextToken();
+				   if(MapCom.containsKey(token)){
+					   int sum = (int) MapCom.get(token) + 1;
+					   MapCom.put(token, sum);
+				   }
+				   else MapCom.put(token, 1);
+			   }
+		   }
+		   
+		   public void cleanup(Context context) throws IOException, InterruptedException{
+			   Iterator<java.util.Map.Entry<String, Integer>> temp = MapCom.entrySet().iterator();
+			   
+			   while(temp.hasNext()){
+				   java.util.Map.Entry<String, Integer> entry = temp.next();
+				   String keyValue = entry.getKey();
+				   Integer value = entry.getValue();
+				   context.write(new Text(keyValue), new IntWritable(value));
+			   }
+		   }
+		}
+		    
+		public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> {
+		
+		   public void reduce(Text key, Iterable<IntWritable> values, Context context)
+		     throws IOException, InterruptedException {
+		       int sum = 0;
+			   for (IntWritable value : values) {
+			       sum += value.get();
+			   }
+			   context.write(key, new IntWritable(sum));
+		   }
+		}
+		    
+		public static void main(String[] args) throws Exception {
+		   Configuration configurations = new Configuration();
+		    
+		   Job teamjob = new Job(configurations, "mapcomwordcount");
+		   teamjob.setJarByClass(MapComWordCount.class);
+		    
+		   teamjob.setOutputKeyClass(Text.class);
+		   teamjob.setOutputValueClass(IntWritable.class);
+		    
+		   teamjob.setMapperClass(Map.class);
+		   teamjob.setReducerClass(Reduce.class);
+		    
+		   teamjob.setInputFormatClass(TextInputFormat.class);
+		   teamjob.setOutputFormatClass(TextOutputFormat.class);
+		    
+		   FileInputFormat.addInputPath(teamjob, new Path(args[0]));
+		   FileOutputFormat.setOutputPath(teamjob, new Path(args[1]));
+		    
+		   teamjob.waitForCompletion(true);
+		}
+	    
 	}
-	    
-	public static void main(String[] args) throws Exception {
-	   Configuration conf = new Configuration();
-	    
-	   Job job = new Job(conf, "wordcount");
-	   job.setJarByClass(InMapperWordCount.class);
-	    
-	   job.setOutputKeyClass(Text.class);
-	   job.setOutputValueClass(IntWritable.class);
-	    
-	   job.setMapperClass(Map.class);
-	   job.setReducerClass(Reduce.class);
-	    
-	   job.setInputFormatClass(TextInputFormat.class);
-	   job.setOutputFormatClass(TextOutputFormat.class);
-	    
-	   FileInputFormat.addInputPath(job, new Path(args[0]));
-	   FileOutputFormat.setOutputPath(job, new Path(args[1]));
-	    
-	   job.waitForCompletion(true);
-	}
-    
-}
+
+
