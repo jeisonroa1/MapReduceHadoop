@@ -1,4 +1,4 @@
-root@lap-field:/data/MapReduceHadoop# hadoop jar proj_part1/part3/relfreqstripe.jar BigDataProject.RelFreqStripe /user/root/programs/testData.txt /user/root/programs/output/3
+root@lap-field:/data/MapReduceHadoop# hadoop jar Part3/RelFreqAtripe.jar BigDataProject.RelFreqStripe /user/root/programs/testData.txt /user/root/programs/output/3
 21/10/14 04:37:35 INFO client.RMProxy: Connecting to ResourceManager at /0.0.0.0:8032
 21/10/14 04:37:35 WARN mapreduce.JobSubmitter: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
 21/10/14 04:37:35 INFO input.FileInputFormat: Total input paths to process : 1
