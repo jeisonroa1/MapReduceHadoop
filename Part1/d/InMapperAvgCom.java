@@ -1,5 +1,4 @@
-package BigDataProject1;
-
+package BigDataProject;
 
 import java.io.DataInput;
 import java.io.IOException;

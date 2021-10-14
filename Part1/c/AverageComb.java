@@ -1,5 +1,4 @@
-package BigDataProject1;
-
+package BigDataProject;
 
 import java.io.IOException;
 import java.util.*;

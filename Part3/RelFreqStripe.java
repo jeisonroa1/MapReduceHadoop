@@ -1,4 +1,5 @@
-package org.myorg;
+package BigDataProject;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.*;
