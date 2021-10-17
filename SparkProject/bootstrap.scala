@@ -30,7 +30,4 @@ object ReadMultipleCSVFiles extends App {
   rdd.collect().foreach(f=>{
     println("Affairs:"+f(0)+",Gender:"+f(1))
   })
-
-  
-
 }
