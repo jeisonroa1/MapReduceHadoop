@@ -1,0 +1,3 @@
+RUN THE CODE IN SPARK-SHELL OR:
+
+spark-shell -i spark.scala
